@@ -74,17 +74,26 @@ choose.addEventListener("change", function() {//при изменении <selec
         hintContent: 'Кремль',
         balloonContentHeader: "Кремль2",
         balloonContentBody:  '<img src="background.png" height="150" width="200">',
-        balloonContentFooter: '<button id="Placemark1_path">Как добраться?</button>',
-        hintContent: "Хинт метки"
+        balloonContentFooter: '<a class="Placemark1">Как добраться?</a>',
+        hintContent: "Хинт метки",
+        InitialContentBody:'<img src="background.png" height="150" width="200">',
+        InitialContentFooter:'<a class="Placemark1">Как добраться?</a>',
+        SecondContentBody:"На маршрутке",
     }, {
         iconLayout: 'default#image',
         iconImageHref: 'background.png', //ссылка на изображение компании(для маркера)
         iconImageSize: [30, 42],//размер картинки
         iconImageOffset: [-5, -38] //расположение точки относительно центра карты(т.к. в данном случае - mymap.getCenter())
-    });
+    },
+    {
+        balloonContentFooter:'<button id="Placemark1_path">Назад</button>'
+    }
+    );
     Placemark2 = new ymaps.Placemark([55.661574, 37.573856], {
         hintContent: 'Добро пожаловать в Москву',
-        balloonContentHeader: 'Кремль'
+        balloonContentHeader: 'Кремль',
+        balloonContentFooter: '<a class="Placemark2">Как добраться?</a>',
+        SecondContentBody:"Пешком ходить полезней!",
     }, {
         iconLayout: 'default#image',
         iconImageHref: 'background.png', //ссылка на изображение компании(для маркера)
@@ -156,19 +165,33 @@ choose.addEventListener("change", function() {//при изменении <selec
         }
     });
     myMap.controls.add(searchControl);
-    //тут создаем функцию для кнопки "Как добраться?"для других по аналогии с первой кнопкой
-    Placemark1.events.add('balloonopen', function (e) {
-        var getPlacemark=document.querySelector("#Placemark1_path"); //при открытии Placemark1 получаем кнопку "Как добраться?"
-        getPlacemark.addEventListener("click", function() {//при нажатии на эту кнопку запускаем событие
-            Placemark1.properties.set('balloonContentBody', "На маршрутке");
-            Placemark1.properties.set('balloonContentFooter', '<button id="Placemark1_path">Назад</button>'); //меняем парамерты baloonContentBody и baloonContentFooter
-            var getPlacemark=document.querySelector("#Placemark1_path");//получаем кнопку "Назад" для того чтобы посетитель мог вернуться назад
-                    getPlacemark.addEventListener("click", function() {//при нажатии вызываем функцию,которая вернет все назад
-                                    Placemark1.properties.set('balloonContentBody','<img src="background.png" height="150" width="200">');
-                                    Placemark1.properties.set('balloonContentFooter', '<button id="Placemark1_path">Как добраться?</button>');
-                                    Placemark1.balloon.close();
-                    })
-        });
-    });
+    var body=document.querySelector("body");
+    body.addEventListener("click",function(){
+        var change_balloon = event.target;
+        var town_points = change_value();
+        if (change_balloon.innerHTML == "Как добраться?"){
+            for(var i=0;town_points.length>i;i+=1){
+            footer = town_points[i].properties.get('balloonContentFooter');
+            if(footer.includes(change_balloon.classList)){
+                var SecondContentBody = town_points[i].properties.get('SecondContentBody');
+                town_points[i].properties.set('balloonContentBody', SecondContentBody);
+                town_points[i].properties.set('balloonContentFooter', '<button id="back">Назад</button>');
+                button = document.querySelector("#back");
+                var last_step = town_points[i];
+                var ContentBody = last_step.properties.get('InitialContentBody');
+                var close_ballon_button = document.querySelector(".ymaps-2-1-79-balloon__close-button");
+                var ContentFooter = last_step.properties.get('InitialContentFooter');
+                button.addEventListener("click",function(){
+                    last_step.properties.set('balloonContentBody',ContentBody);
+                    last_step.properties.set('balloonContentFooter', ContentFooter);
+                })
+                close_ballon_button.addEventListener("click",function(){ //на случай,если пользователь нажмет крестик
+                    last_step.properties.set('balloonContentBody',ContentBody);
+                    last_step.properties.set('balloonContentFooter', ContentFooter);
+                })
+            }
+            }
+        };
+    })
 });
 </script>
