@@ -84,11 +84,7 @@ choose.addEventListener("change", function() {//при изменении <selec
         iconImageHref: 'background.png', //ссылка на изображение компании(для маркера)
         iconImageSize: [30, 42],//размер картинки
         iconImageOffset: [-5, -38] //расположение точки относительно центра карты(т.к. в данном случае - mymap.getCenter())
-    },
-    {
-        balloonContentFooter:'<button id="Placemark1_path">Назад</button>'
-    }
-    );
+    });
     Placemark2 = new ymaps.Placemark([55.661574, 37.573856], {
         hintContent: 'Добро пожаловать в Москву',
         balloonContentHeader: 'Кремль',
