@@ -25,7 +25,7 @@
 <div id="map"></div>
 </body>
 </html>
-<script type="text/javascript">
+<script id="main" type="text/javascript">
 ymaps.ready(function () {
     var value="Moscow";
     var Moscow_points=[];
@@ -72,7 +72,10 @@ choose.addEventListener("change", function() {//при изменении <selec
     //здесь создаем все метки для карт
     Placemark1 = new ymaps.Placemark(myMap.getCenter(), {
         hintContent: 'Кремль',
-        balloonContent: 'Кремль2'
+        balloonContentHeader: "Кремль2",
+        balloonContentBody:  '<img src="background.png" height="150" width="200">',
+        balloonContentFooter: '<button id="Placemark1_path">Как добраться?</button>',
+        hintContent: "Хинт метки"
     }, {
         iconLayout: 'default#image',
         iconImageHref: 'background.png', //ссылка на изображение компании(для маркера)
@@ -81,7 +84,7 @@ choose.addEventListener("change", function() {//при изменении <selec
     });
     Placemark2 = new ymaps.Placemark([55.661574, 37.573856], {
         hintContent: 'Добро пожаловать в Москву',
-        balloonContent: 'Кремль'
+        balloonContentHeader: 'Кремль'
     }, {
         iconLayout: 'default#image',
         iconImageHref: 'background.png', //ссылка на изображение компании(для маркера)
@@ -89,12 +92,13 @@ choose.addEventListener("change", function() {//при изменении <selec
     });
     Placemark4 = new ymaps.Placemark([ 59.9386, 30.3141],{ //даем координаты новой точки
         hintContent: 'название вашей компании',
-        balloonContent: 'Также название вашей компании'
+        balloonContentHeader: 'Также название вашей компании'
     }, {
         iconLayout: 'default#image',//ти файла
         iconImageHref: 'background.png', //ссылка на изображение компании(для маркера)
         iconImageSize: [30, 42],//размер картинки
     });
+
     Moscow_points.push(Placemark1); //добавляем новую точку в коллекцию города, в который хотим их добавить(В данном случае Moscow_points - Москва, может быть SPB_points - Санкт Петербург, или другие города, созданные вами )
     Moscow_points.push(Placemark2);
     SPB_points.push(Placemark4);//добавляем новую точку в коллекцию города, в который хотим их добавить(В данном случае SPB_points - Санкт Петербург, может быть Moscow_points - Москва, или другие города, созданные вами )
@@ -115,7 +119,7 @@ choose.addEventListener("change", function() {//при изменении <selec
     function choose_point(){
         var menu = $('<ul class="menu"/>');
         for (var i=0;i<town_points.length;i+=1){
-            var information = town_points[i].properties.get('balloonContent')
+            var information = town_points[i].properties.get('balloonContentHeader')
             var menuItem = $('<li><a href="#"class="choosen" id="'+i+'">' + information + '</a></li>');
             menuItem.appendTo(menu);
         }
@@ -127,7 +131,6 @@ choose.addEventListener("change", function() {//при изменении <selec
             var menu=document.querySelector(".menu");
             menu.addEventListener("click", function() {
             var target = event.target;
-            console.log(target.id);
             target = target.id;
             if (!town_points[target].balloon.isOpen()) {
                 myMap.panTo([town_points[target].geometry.getCoordinates()], {
@@ -153,5 +156,19 @@ choose.addEventListener("change", function() {//при изменении <selec
         }
     });
     myMap.controls.add(searchControl);
+    //тут создаем функцию для кнопки "Как добраться?"для других по аналогии с первой кнопкой
+    Placemark1.events.add('balloonopen', function (e) {
+        var getPlacemark=document.querySelector("#Placemark1_path"); //при открытии Placemark1 получаем кнопку "Как добраться?"
+        getPlacemark.addEventListener("click", function() {//при нажатии на эту кнопку запускаем событие
+            Placemark1.properties.set('balloonContentBody', "На маршрутке");
+            Placemark1.properties.set('balloonContentFooter', '<button id="Placemark1_path">Назад</button>'); //меняем парамерты baloonContentBody и baloonContentFooter
+            var getPlacemark=document.querySelector("#Placemark1_path");//получаем кнопку "Назад" для того чтобы посетитель мог вернуться назад
+                    getPlacemark.addEventListener("click", function() {//при нажатии вызываем функцию,которая вернет все назад
+                                    Placemark1.properties.set('balloonContentBody','<img src="background.png" height="150" width="200">');
+                                    Placemark1.properties.set('balloonContentFooter', '<button id="Placemark1_path">Как добраться?</button>');
+                                    Placemark1.balloon.close();
+                    })
+        });
+    });
 });
 </script>
