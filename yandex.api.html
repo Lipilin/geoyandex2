@@ -13,6 +13,16 @@
             width:400px;
             height:500px;
         }
+        .menu{
+            position: absolute;
+            left:430px;
+            top:120px;
+        }
+        .search{
+            position: absolute;
+            left:450px;
+            top:100px;
+        }
     </style>
 </head>
 <body>
@@ -23,6 +33,10 @@
     </optgroup>
 </select>
 <div id="map"></div>
+<div class="search">
+    <input type="text" id="search" placeholder="Поиск по точкам">
+</div>
+
 </body>
 </html>
 <script id="main" type="text/javascript">
@@ -30,6 +44,18 @@ ymaps.ready(function () {
     var value="Moscow";
     var Moscow_points=[];
     var SPB_points=[];
+    var search_points = document.querySelector("#search");
+    function change_value(){
+    if(value=="Moscow"){//по аналогии сбда добавляем новые города
+            var town_points=Moscow_points;
+            return town_points;
+    }
+    if(value=="SPB"){
+            var town_points=SPB_points;
+            return town_points;
+     }     
+    }
+    town_points = change_value();
     all_points=new Map([
         ['Moscow',Moscow_points],
         ['SPB',SPB_points]
@@ -78,13 +104,14 @@ choose.addEventListener("change", function() {//при изменении <selec
         hintContent: "Хинт метки",
         InitialContentBody:'<img src="background.png" height="150" width="200">',
         InitialContentFooter:'<a class="Placemark1">Как добраться?</a>',
-        SecondContentBody:"На маршрутке",
+        SecondContentBody:'На маршрутке',
     }, {
         iconLayout: 'default#image',
         iconImageHref: 'background.png', //ссылка на изображение компании(для маркера)
         iconImageSize: [30, 42],//размер картинки
         iconImageOffset: [-5, -38] //расположение точки относительно центра карты(т.к. в данном случае - mymap.getCenter())
-    });
+    }
+    );
     Placemark2 = new ymaps.Placemark([55.661574, 37.573856], {
         hintContent: 'Добро пожаловать в Москву',
         balloonContentHeader: 'Кремль',
@@ -97,35 +124,66 @@ choose.addEventListener("change", function() {//при изменении <selec
     });
     Placemark4 = new ymaps.Placemark([ 59.9386, 30.3141],{ //даем координаты новой точки
         hintContent: 'название вашей компании',
-        balloonContentHeader: 'Также название вашей компании'
+        balloonContentHeader: 'Также название вашей компании',
+        balloonContentBody:  '<img src="background.png" height="150" width="200">',
+        balloonContentFooter: '<a class="Placemark1">Как добраться?</a>',
+        hintContent: "Хинт метки",
+        InitialContentBody:'<img src="background.png" height="150" width="200">',
+        InitialContentFooter:'<a class="Placemark1">Как добраться?</a>',
+        SecondContentBody:'На маршрутке',
     }, {
         iconLayout: 'default#image',//ти файла
         iconImageHref: 'background.png', //ссылка на изображение компании(для маркера)
         iconImageSize: [30, 42],//размер картинки
     });
-
+var result = search_points.addEventListener("input", function(){
+    $(".menu").detach();
+    list=[];
+    choose_point();
+    var menu=document.querySelector(".menu");
+    var zoomto = new zoom;
+    zoomto.zoom_object();
+    search_value=search_points.value;
+    if (search_points.value==""){
+        $(".menu").detach();
+        choose_point();
+        return;
+    }
+    for(var i=0;town_points.length>i;i+=1){
+        hint=town_points[i].properties.get('balloonContentHeader');
+        var quantity=document.querySelectorAll(".menuitems"+i+"");
+        if(hint.match(search.value)){
+            list.push(quantity);
+            var menu = document.querySelector(".menu");
+        }else{
+            $(".menuitems"+i+"").detach();
+        }
+        var activate=i;
+    }
+    if(list.length===1){
+        var quantity=document.querySelector(".choosen");
+        console.log(quantity);
+        myMap.panTo([town_points[quantity.id].geometry.getCoordinates()], {
+            delay: 0,
+            flying: true
+        }).then(function() {
+        myMap.setZoom(13);
+    });
+    }else{
+        myMap.setZoom(9);
+    }
+ });
     Moscow_points.push(Placemark1); //добавляем новую точку в коллекцию города, в который хотим их добавить(В данном случае Moscow_points - Москва, может быть SPB_points - Санкт Петербург, или другие города, созданные вами )
     Moscow_points.push(Placemark2);
     SPB_points.push(Placemark4);//добавляем новую точку в коллекцию города, в который хотим их добавить(В данном случае SPB_points - Санкт Петербург, может быть Moscow_points - Москва, или другие города, созданные вами )
     //добавляем метки на первую карту
     myMap.geoObjects.add(Placemark1); //добавляем на первую карту 
     myMap.geoObjects.add(Placemark2);
-    function change_value(){
-    if(value=="Moscow"){//по аналогии сбда добавляем новые города
-            var town_points=Moscow_points;
-            return town_points;
-    }
-    if(value=="SPB"){
-            var town_points=SPB_points;
-            return town_points;
-     }     
-    }
-    town_points = change_value();
     function choose_point(){
-        var menu = $('<ul class="menu"/>');
+        var menu = $('<ul class="menu"></ul>');
         for (var i=0;i<town_points.length;i+=1){
             var information = town_points[i].properties.get('balloonContentHeader')
-            var menuItem = $('<li><a href="#"class="choosen" id="'+i+'">' + information + '</a></li>');
+            var menuItem = $('<li class="menuitems'+i+'"><a href="#"class="choosen" id="'+i+'">' + information + '</a></li>');
             menuItem.appendTo(menu);
         }
         menu.appendTo($('body'));
@@ -143,8 +201,8 @@ choose.addEventListener("change", function() {//при изменении <selec
                     flying: true
                     }).then(function() {
                          myMap.setZoom(13);
+                         town_points[target].balloon.open();
                     });
-                town_points[target].balloon.open();
             }else{
                 myMap.setZoom(9);
                 town_points[target].balloon.close();
