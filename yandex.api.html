@@ -162,7 +162,6 @@ var result = search_points.addEventListener("input", function(){
     }
     if(list.length===1){
         var quantity=document.querySelector(".choosen");
-        console.log(quantity);
         myMap.panTo([town_points[quantity.id].geometry.getCoordinates()], {
             delay: 0,
             flying: true
