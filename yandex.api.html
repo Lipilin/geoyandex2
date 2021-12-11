@@ -151,8 +151,9 @@ var result = search_points.addEventListener("input", function(){
     }
     for(var i=0;town_points.length>i;i+=1){
         hint=town_points[i].properties.get('balloonContentHeader');
+        hint=hint.toLowerCase();
         var quantity=document.querySelectorAll(".menuitems"+i+"");
-        if(hint.match(search.value)){
+        if(hint.match(search.value.toLowerCase())){
             list.push(quantity);
             var menu = document.querySelector(".menu");
         }else{
@@ -162,6 +163,7 @@ var result = search_points.addEventListener("input", function(){
     }
     if(list.length===1){
         var quantity=document.querySelector(".choosen");
+        console.log(quantity);
         myMap.panTo([town_points[quantity.id].geometry.getCoordinates()], {
             delay: 0,
             flying: true
