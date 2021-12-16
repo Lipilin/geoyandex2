@@ -28,8 +28,8 @@
 <body>
 <select id = "selection"> 
     <optgroup label = "Россия">
-    <option value="Moscow" id = "Moscow">Москва</option>
-    <option value = "SPB" id= "SPB">Санкт-Петербург</option>
+    <option value="Minsk" id = "Moscow">Минск</option>
+    <option value = "Dzerzhinsk" id= "Dzerzhinsk">Дзержинск</option>
     </optgroup>
 </select>
 <div id="map"></div>
@@ -41,25 +41,21 @@
 </html>
 <script id="main" type="text/javascript">
 ymaps.ready(function () {
-    var value="Moscow";
-    var Moscow_points=[];
-    var SPB_points=[];
+    var value="Minsk";
+    var Minsk_points=[];
+    var Dzerzhinsk_points=[];
     var search_points = document.querySelector("#search");
     function change_value(){
-    if(value=="Moscow"){//по аналогии сбда добавляем новые города
-            var town_points=Moscow_points;
+    if(value=="Minsk"){//по аналогии сбда добавляем новые города
+            var town_points=Minsk_points;
             return town_points;
     }
-    if(value=="SPB"){
-            var town_points=SPB_points;
+    if(value=="Dzerzhinsk"){
+            var town_points=Dzerzhinsk_points;
             return town_points;
      }     
     }
     town_points = change_value();
-    all_points=new Map([
-        ['Moscow',Moscow_points],
-        ['SPB',SPB_points]
-        ]);//Здесь хранятся точки различных городов
     var choose = document.querySelector('#selection');
 choose.addEventListener("change", function() {//при изменении <select></select> срабатывает функция
     $(".menu").detach();
@@ -70,11 +66,11 @@ choose.addEventListener("change", function() {//при изменении <selec
     var zoomto = new zoom;
     zoomto.zoom_object();
     var coords_db = new Map([
-        ['Moscow', [55.751574, 37.573856]],
-        ['SPB', [ 59.9386, 30.3141]],
+        ['Minsk', [53.79385, 27.37402]],
+        ['Dzerzhinsk', [ 56.233333, 43.45]],
     ]);//сюда добавлять координаты новых городов
     var coords = coords_db.get(value);
-    var points=all_points.get(value);
+    var points=town_points;
     //рисуем вторую,третью и т.д. карты
     myMap = new ymaps.Map('map', {
         center: [coords[0],coords[1] ], //координаты
@@ -91,14 +87,14 @@ choose.addEventListener("change", function() {//при изменении <selec
 
     //создание самой первой карта
     var myMap = new ymaps.Map('map', {
-        center: [55.751574,37.573856 ], //координаты
+        center: [53.79385, 27.37402], //координаты
         zoom: 9, //приближение карты
         controls:[] 
     });
     //здесь создаем все метки для карт
     Placemark1 = new ymaps.Placemark(myMap.getCenter(), {
-        hintContent: 'Кремль',
-        balloonContentHeader: "Кремль2",
+        hintContent: 'Минск',
+        balloonContentHeader: "Минск",
         balloonContentBody:  '<img src="background.png" height="150" width="200">',
         balloonContentFooter: '<a class="Placemark1">Как добраться?</a>',
         hintContent: "Хинт метки",
@@ -112,9 +108,9 @@ choose.addEventListener("change", function() {//при изменении <selec
         iconImageOffset: [-5, -38] //расположение точки относительно центра карты(т.к. в данном случае - mymap.getCenter())
     }
     );
-    Placemark2 = new ymaps.Placemark([55.661574, 37.573856], {
-        hintContent: 'Добро пожаловать в Москву',
-        balloonContentHeader: 'Кремль',
+    Placemark2 = new ymaps.Placemark([53.79385, 27.72402], {
+        hintContent: 'Добро пожаловать в Минск',
+        balloonContentHeader: 'Столица',
         balloonContentFooter: '<a class="Placemark2">Как добраться?</a>',
         SecondContentBody:"Пешком ходить полезней!",
     }, {
@@ -122,7 +118,7 @@ choose.addEventListener("change", function() {//при изменении <selec
         iconImageHref: 'background.png', //ссылка на изображение компании(для маркера)
         iconImageSize: [30, 42],//размер картинки //расположение точки относительно центра карты(т.к. в данном случае - mymap.getCenter())
     });
-    Placemark4 = new ymaps.Placemark([ 59.9386, 30.3141],{ //даем координаты новой точки
+    Placemark4 = new ymaps.Placemark([56.233333, 43.45],{ //даем координаты новой точки
         hintContent: 'название вашей компании',
         balloonContentHeader: 'Также название вашей компании',
         balloonContentBody:  '<img src="background.png" height="150" width="200">',
@@ -136,6 +132,12 @@ choose.addEventListener("change", function() {//при изменении <selec
         iconImageHref: 'background.png', //ссылка на изображение компании(для маркера)
         iconImageSize: [30, 42],//размер картинки
     });
+    Minsk_points.push(Placemark1); //добавляем новую точку в коллекцию города, в который хотим их добавить(В данном случае Moscow_points - Москва, может быть SPB_points - Санкт Петербург, или другие города, созданные вами )
+    Minsk_points.push(Placemark2);
+    Dzerzhinsk_points.push(Placemark4);//добавляем новую точку в коллекцию города, в который хотим их добавить(В данном случае SPB_points - Санкт Петербург, может быть Moscow_points - Москва, или другие города, созданные вами )
+    //добавляем метки на первую карту
+    myMap.geoObjects.add(Placemark1); //добавляем на первую карту 
+    myMap.geoObjects.add(Placemark2);
 var result = search_points.addEventListener("input", function(){
     $(".menu").detach();
     list=[];
@@ -174,12 +176,6 @@ var result = search_points.addEventListener("input", function(){
         myMap.setZoom(9);
     }
  });
-    Moscow_points.push(Placemark1); //добавляем новую точку в коллекцию города, в который хотим их добавить(В данном случае Moscow_points - Москва, может быть SPB_points - Санкт Петербург, или другие города, созданные вами )
-    Moscow_points.push(Placemark2);
-    SPB_points.push(Placemark4);//добавляем новую точку в коллекцию города, в который хотим их добавить(В данном случае SPB_points - Санкт Петербург, может быть Moscow_points - Москва, или другие города, созданные вами )
-    //добавляем метки на первую карту
-    myMap.geoObjects.add(Placemark1); //добавляем на первую карту 
-    myMap.geoObjects.add(Placemark2);
     function choose_point(){
         var menu = $('<ul class="menu"></ul>');
         for (var i=0;i<town_points.length;i+=1){
